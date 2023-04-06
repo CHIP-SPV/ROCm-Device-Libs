@@ -12,7 +12,8 @@ REQUIRES_16BIT_INSTS CONSTATTR half
 MATH_MANGLE(native_rcp)(half x)
 {
     // FIXME: Should use IR fdiv with arcp set.
-    return __builtin_amdgcn_rcph(x);
+    // return __builtin_amdgcn_rcph(x);
+    return 1.0f / x;
 }
 
 CONSTATTR half
@@ -24,7 +25,8 @@ MATH_MANGLE(native_sqrt)(half x)
 REQUIRES_16BIT_INSTS CONSTATTR half
 MATH_MANGLE(native_rsqrt)(half x)
 {
-    return __builtin_amdgcn_rsqh(x);
+    // return __builtin_amdgcn_rsqh(x);
+    return 1.0f / __builtin_sqrtf16(x);
 }
 
 CONSTATTR half

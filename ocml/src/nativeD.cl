@@ -12,7 +12,8 @@ CONSTATTR double
 MATH_MANGLE(native_recip)(double x)
 {
     // FIXME: Should use IR fdiv with arcp set.
-    return __builtin_amdgcn_rcp(x);
+    // return __builtin_amdgcn_rcp(x);
+    return 1.0f / x;
 }
 
 CONSTATTR double
@@ -24,7 +25,8 @@ MATH_MANGLE(native_sqrt)(double x)
 CONSTATTR double
 MATH_MANGLE(native_rsqrt)(double x)
 {
-    return __builtin_amdgcn_rsq(x);
+    
+    return 1.0f / __builtin_sqrt(x);
 }
 
 CONSTATTR double
