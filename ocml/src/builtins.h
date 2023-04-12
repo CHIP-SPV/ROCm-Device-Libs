@@ -151,10 +151,18 @@ static inline uint BUILTIN_BITALIGN_B32(uint x, uint y, uint shift) {
 #define BUILTIN_MIN_S32(A,B) ((A) < (B) ? (A) : (B))
 #define BUILTIN_MIN_U32(A,B) ((A) < (B) ? (A) : (B))
 
+#if defined(__HIP_PLATFORM_AMD__)
 #define BUILTIN_CANONICALIZE_F32(X) __builtin_canonicalizef(X)
 #define BUILTIN_CANONICALIZE_F64(X) __builtin_canonicalize(X)
 #define BUILTIN_CANONICALIZE_F16(X) __builtin_canonicalizef16(X)
 #define BUILTIN_CANONICALIZE_2F16(X) __llvm_canonicalize_2f16(X)
+#else
+// TODO SPIR-V Alternative?
+#define BUILTIN_CANONICALIZE_F32(X) 0
+#define BUILTIN_CANONICALIZE_F64(X) 0
+#define BUILTIN_CANONICALIZE_F16(X) 0
+#define BUILTIN_CANONICALIZE_2F16(X) 0
+#endif
 
 #define BUILTIN_MULHI_U32(A,B) (((ulong)(A) * (ulong)(B)) >> 32)
 
