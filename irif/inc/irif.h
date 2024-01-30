@@ -169,7 +169,7 @@ static inline half __builtin_generic_clamp_f16(half x, half l, half h) {
     return x < l ? l : (x > h ? h : x);
 }
 
-inline int __builtin_generic_class_f32(float x, int klass) {
+static inline int __builtin_generic_class_f32(float x, int klass) {
     unsigned long ix = *((unsigned long *)&x);
 
     if ((klass & CLASS_PINF) && (ix == PINFBITPATT_SP32)) {
@@ -191,7 +191,7 @@ inline int __builtin_generic_class_f32(float x, int klass) {
     return 0;
 }
 
-inline int __builtin_generic_class_f64(double x, int klass) {
+static inline int __builtin_generic_class_f64(double x, int klass) {
     unsigned long long ix = *((unsigned long long *)&x);
 
     if ((klass & CLASS_PINF) && (ix == PINFBITPATT_DP64)) {
@@ -213,7 +213,7 @@ inline int __builtin_generic_class_f64(double x, int klass) {
     return 0;
 }
 
-inline int __builtin_generic_class_f16(unsigned short x, int klass) {
+static inline int __builtin_generic_class_f16(unsigned short x, int klass) {
     if ((klass & CLASS_PINF) && (x == PINFBITPATT_HP16)) {
         return -1;
     }
