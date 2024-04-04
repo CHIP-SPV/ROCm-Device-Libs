@@ -99,7 +99,7 @@ macro(opencl_bc_lib)
     if (fext STREQUAL ".cl")
       set(output "${CMAKE_CURRENT_BINARY_DIR}/${fname_we}${BC_EXT}")
       add_custom_command(OUTPUT "${output}"
-        COMMAND ${LLVM_CONFIG_DIR}/clang ${inc_options} ${CLANG_OCL_FLAGS}
+        COMMAND ${CLANG_ROOT_PATH_BIN}/clang ${inc_options} ${CLANG_OCL_FLAGS}
           -emit-llvm -Xclang -mlink-builtin-bitcode -Xclang "${irif_lib_output}"
           -c "${file}" -o "${output}"
         DEPENDS "${file}" "${irif_lib_output}" "${CLANG}"
@@ -130,12 +130,12 @@ macro(opencl_bc_lib)
 
   add_custom_command(OUTPUT ${OUTPUT_BC_LIB}
     # Link regular library dependencies
-    COMMAND ${LLVM_CONFIG_DIR}/llvm-link
+    COMMAND ${CLANG_ROOT_PATH_BIN}/llvm-link
       -o "${OUT_NAME}.link0${LIB_SUFFIX}" "@${OUT_NAME}_response"
     # Extra link step with internalize
-    COMMAND ${LLVM_CONFIG_DIR}/llvm-link -internalize -only-needed "${name}.link0${LIB_SUFFIX}"
+    COMMAND ${CLANG_ROOT_PATH_BIN}/llvm-link -internalize -only-needed "${name}.link0${LIB_SUFFIX}"
       -o "${OUT_NAME}${LIB_SUFFIX}" ${internal_link_libs}
-    COMMAND ${LLVM_CONFIG_DIR}/opt -passes=strip
+    COMMAND ${CLANG_ROOT_PATH_BIN}/opt -passes=strip
       -o "${OUT_NAME}${STRIP_SUFFIX}" "${OUT_NAME}${LIB_SUFFIX}"
     COMMAND "${PREPARE_BUILTINS}"
       -o ${OUTPUT_BC_LIB} "${OUT_NAME}${STRIP_SUFFIX}"
@@ -208,7 +208,7 @@ macro(clang_opencl_test name dir)
   clang_opencl_code(${name} ${dir} hip opencl ocml ockl ${OCLC_DEFAULT_LIBS})
   add_test(
     NAME ${name}:llvm-objdump
-    COMMAND ${LLVM_CONFIG_DIR}/llvm-objdump -disassemble -mcpu=fiji "${name}.co"
+    COMMAND ${CLANG_ROOT_PATH_BIN}/llvm-objdump -disassemble -mcpu=fiji "${name}.co"
   )
 endmacro()
 
