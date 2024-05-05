@@ -21,6 +21,7 @@ if (ROCM_DEVICELIB_STANDALONE_BUILD)
 endif()
 
 add_executable(prepare-builtins prepare-builtins.cpp)
+target_compile_options(prepare-builtins PRIVATE -I/${LLVM_INCLUDE_DIRS})
 set_target_properties(prepare-builtins PROPERTIES
   CXX_STANDARD 17
   CXX_STANDARD_REQUIRED Yes
