@@ -15,7 +15,7 @@ MATH_MANGLE(erfcinv)(double y)
     if (y > 0.625) {
         ret = MATH_MANGLE(erfinv)(1.0 - y);
     } else if (y > 0x1.0p-10) {
-        double t = -MATH_MANGLE(log)(y * (2.0 - y)) - 3.125;
+        double t = -__builtin_log(y * (2.0 - y)) - 3.125;
 
         ret = MATH_MAD(t, MATH_MAD(t, MATH_MAD(t, MATH_MAD(t, 
               MATH_MAD(t, MATH_MAD(t, MATH_MAD(t, MATH_MAD(t, 
@@ -31,7 +31,7 @@ MATH_MANGLE(erfcinv)(double y)
                   -0x1.8b6c33114edadp-8), 0x1.ebd80d9b13e14p-3), 0x1.a755e7c99ae86p+0);
         ret = BUILTIN_FMA_F64(-y, ret, ret);
     } else {
-        double s = MATH_SQRT(-MATH_MANGLE(log)(y));
+        double s = MATH_SQRT(-__builtin_log(y));
         double t = MATH_RCP(s);
 
         if (y > 0x1.0p-19) {

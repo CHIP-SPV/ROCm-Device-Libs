@@ -26,7 +26,7 @@ MATH_MANGLE(erfinv)(float x)
         } else {
             w = (1.0f - ax) * (1.0f + ax);
         }
-        w = -MATH_MANGLE(log)(w);
+        w = -__builtin_log(w);
 
         if (w < 5.0f) {
             w = w - 2.5f;

@@ -25,7 +25,7 @@ MATH_MANGLE(erfinv)(double x)
                   0x1.62847c8653359p-4), 0x1.053c2c0a5e083p-3), 0x1.db29fb2feec72p-3), 0x1.c5bf891b4ef6ap-1);
         ret = ax * ret;
     } else if (ax < 0x1.fffep-1) {
-        double w = -MATH_MANGLE(log)(BUILTIN_FMA_F64(-ax, ax, 1.0));
+        double w = -__builtin_log(BUILTIN_FMA_F64(-ax, ax, 1.0));
 
         if (w < 6.25) {
             w = w - 3.125;
@@ -67,7 +67,7 @@ MATH_MANGLE(erfinv)(double x)
         }
         ret = ax * ret;
     } else {
-        double s = MATH_SQRT(-MATH_MANGLE(log)(1.0 - ax));
+        double s = MATH_SQRT(-__builtin_log(1.0 - ax));
         double t = MATH_RCP(s);
 
         if (ax < 0x1.fffffffep-1) {

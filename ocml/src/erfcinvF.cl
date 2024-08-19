@@ -15,7 +15,7 @@ MATH_MANGLE(erfcinv)(float y)
     if (y > 0.625f) {
         ret = MATH_MANGLE(erfinv)(1.0f - y);
     } else if (y > 0x1.0p-10f) {
-        float t = -MATH_MANGLE(log)(y * (2.0f - y)) - 3.125f;
+        float t = -__builtin_log(y * (2.0f - y)) - 3.125f;
         ret = MATH_MAD(t, MATH_MAD(t, MATH_MAD(t, MATH_MAD(t,
               MATH_MAD(t, MATH_MAD(t, MATH_MAD(t, MATH_MAD(t,
               MATH_MAD(t, MATH_MAD(t,
@@ -24,7 +24,7 @@ MATH_MANGLE(erfcinv)(float y)
                   -0x1.8b6ca4p-8f), 0x1.ebd80cp-3f), 0x1.a755e8p+0f);
         ret = MATH_MAD(-y, ret, ret);
     } else {
-        float s = MATH_FAST_SQRT(-MATH_MANGLE(log)(y));
+        float s = MATH_FAST_SQRT(-__builtin_log(y));
         float t = MATH_FAST_RCP(s);
 
         if (y > 0x1.0p-42f) {
