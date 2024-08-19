@@ -28,7 +28,7 @@ MATH_MANGLE(rcbrt)(double x)
     c = BUILTIN_FLDEXP_F64(c, -e);
 
     if (!FINITE_ONLY_OPT()) {
-        c = BUILTIN_CLASS_F64(a, CLASS_PINF) ? 0.0 : c;
+        c = isinf(a) ? 0.0 : c;
         c = x == 0.0 ? AS_DOUBLE(PINFBITPATT_DP64) : c;
     }
 
