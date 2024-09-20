@@ -26,6 +26,42 @@ set_target_properties(prepare-builtins PROPERTIES
   CXX_STANDARD 17
   CXX_STANDARD_REQUIRED Yes
   CXX_EXTENSIONS No)
-llvm_update_compile_flags(prepare-builtins)
+
+set(LLVM_COMPONENTS_FOUND TRUE)
+set(LLVM_COMPONENTS support core bitreader bitwriter)
+
 llvm_map_components_to_libnames(llvm_libs support core bitreader bitwriter)
-target_link_libraries(prepare-builtins ${llvm_libs})
+
+# Find LLVM libraries
+foreach(lib ${llvm_libs})
+  find_library(${lib}_LIBRARY
+    NAMES lib${lib}.a lib${lib}.so
+    PATHS ${LLVM_LIBRARY_DIR}
+    NO_DEFAULT_PATH
+  )
+  if(${lib}_LIBRARY)
+    message(STATUS "Found LLVM library: ${${lib}_LIBRARY}")
+    list(APPEND FOUND_LLVM_LIBS ${${lib}_LIBRARY})
+  else()
+    message(STATUS "Could not find LLVM library: ${lib}")
+    set(LLVM_COMPONENTS_FOUND FALSE)
+  endif()
+  unset(${lib}_LIBRARY CACHE)
+endforeach()
+
+if(LLVM_COMPONENTS_FOUND)
+  message(STATUS "Found LLVM Components: ${FOUND_LLVM_LIBS}")
+  llvm_update_compile_flags(prepare-builtins)
+  target_link_libraries(prepare-builtins PRIVATE ${llvm_libs})
+else()
+  # Find libLLVM
+  find_library(LLVM_LIBRARY
+    NAMES libLLVM.so libLLVM.a
+    PATHS ${LLVM_LIBRARY_DIR}
+    NO_DEFAULT_PATH
+    REQUIRED
+  )
+  message(STATUS "Found LLVM Library: ${LLVM_LIBRARY}")
+  llvm_config(prepare-builtins USE_SHARED support core bitreader bitwriter)
+endif()
+
