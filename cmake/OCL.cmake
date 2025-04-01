@@ -9,7 +9,9 @@
 # command-lines, but the only way to do this as part of the dependency graph is
 # configure_file and we are included from multiple places. To get around this
 # we `file(WRITE)` a file with an @variable reference and `configure_file` it.
-cmake_policy(SET CMP0053 OLD)
+if (WIN32)
+  cmake_policy(SET CMP0053 OLD)
+endif()
 
 if (WIN32)
   set(EXE_SUFFIX ".exe")
