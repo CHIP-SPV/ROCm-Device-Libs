@@ -5,8 +5,8 @@
 ## License. See LICENSE.TXT for details.
 ##===--------------------------------------------------------------------------
 
-file(GLOB sources
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.ll
+file(GLOB source_templates
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.ll.in
 )
 
 set(irif_lib_file ${CMAKE_CURRENT_BINARY_DIR}/irif.bc)
@@ -18,27 +18,39 @@ set(irif_lib_file ${CMAKE_CURRENT_BINARY_DIR}/irif.bc)
 # add_executable(llvm-link IMPORTED)
 # set_target_properties(llvm-link PROPERTIES IMPORTED_LOCATION ${LLVM_LINK_EXECUTABLE})
 
-# The textual IR sources on purpose omit 'target triple' and 'target
-# datalayout' statements so we can retarget them to the desired
-# target. This command sets the desired target triple and populates
-# the 'target datalayout' for it.
-foreach(source IN LISTS sources)
-  get_filename_component(source_name ${source} NAME_WLE)
-  set(bitcode_source ${CMAKE_CURRENT_BINARY_DIR}/${source_name}.bc)
-  add_custom_command(
-    OUTPUT ${bitcode_source}
-    COMMAND ${CLANG_ROOT_PATH_BIN}/opt -mtriple ${AMDGPU_TARGET_TRIPLE}
-    ${source} -o ${bitcode_source}
-    DEPENDS ${source})
-  list(APPEND bitcode_sources ${bitcode_source})
+set(TARGET_TRIPLE ${AMDGPU_TARGET_TRIPLE})
+if(TARGET_TRIPLE MATCHES "amdgcn.*")
+  set(TARGET_DATALAYOUT "e-p:64:64-p1:64:64-p2:32:32-p3:32:32-p4:64:64-p5:32:32-p6:32:32-i64:64-v16:16-v24:32-v32:32-v48:64-v96:128-v192:256-v256:256-v512:512-v1024:1024-v2048:2048-n32:64-S32-A5")
+elseif(TARGET_TRIPLE MATCHES "spirv64.*")
+  execute_process(
+    COMMAND touch empty.c
+    COMMAND ${CLANG_ROOT_PATH_BIN}/clang -target ${AMDGPU_TARGET_TRIPLE}
+    empty.c -emit-llvm -S -o -
+    OUTPUT_VARIABLE code_output
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND_ERROR_IS_FATAL ANY)
+
+  string(REGEX MATCH "target datalayout = \"[^ ]*\"" datalayout_stmt
+    ${code_output})
+  string(REGEX REPLACE "target datalayout = \"([^ ]*)\"" "\\1"
+    TARGET_DATALAYOUT ${datalayout_stmt})
+else()
+  message(FATAL_ERROR "Don't know datalayout for '${TARGET_TRIPLE}' triple.")
+endif()
+
+foreach(template IN LISTS source_templates)
+  get_filename_component(source_name ${template} NAME_WLE)
+  set(source ${CMAKE_CURRENT_BINARY_DIR}/${source_name})
+  configure_file(${template} ${source} @ONLY)
+  list(APPEND sources ${source})
 endforeach()
 
 add_custom_command(OUTPUT ${irif_lib_file}
-  COMMAND $<TARGET_FILE:llvm-link> ${bitcode_sources} -o ${irif_lib_file}
-  DEPENDS ${bitcode_sources})
+  COMMAND $<TARGET_FILE:llvm-link> ${sources} -o ${irif_lib_file}
+  DEPENDS ${sources})
 
 add_custom_target(irif DEPENDS ${irif_lib_file}
-                       SOURCES ${bitcode_sources})
+                       SOURCES ${sources})
 set_target_properties(irif PROPERTIES
   OUTPUT_NAME ${irif_lib_file}
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"

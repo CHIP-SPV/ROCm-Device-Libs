@@ -2,6 +2,9 @@
 ;;; TODO add synchscope(N)
 ;;;
 
+target datalayout = "@TARGET_DATALAYOUT@"
+target triple = "@TARGET_TRIPLE@"
+
 ;;;;; Load
 define protected i32 @__llvm_ld_atomic_a1_x_dev_i32(i32 addrspace(1)* nocapture readonly) #0 {
   %2 = load atomic volatile i32, i32 addrspace(1)* %0 monotonic, align 4
