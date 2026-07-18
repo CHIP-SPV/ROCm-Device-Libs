@@ -68,15 +68,11 @@ add_subdirectory(opencl)
 add_subdirectory(hip)
 add_subdirectory(asanrtl)
 
-# chipStar: allow embedders to disable the device-lib tests. These require the
-# full amdgcn device-lib set (not built by chipStar) and otherwise register a
-# ctest (constant_fold_lgamma_r) that always fails. Defaults ON to preserve
-# standalone behavior.
-option(ROCM_DEVICELIB_BUILD_TESTS "Build ROCm-Device-Libs tests" ON)
-if(ROCM_DEVICELIB_BUILD_TESTS)
-  enable_testing()
-  add_subdirectory(test/constant_folding)
-endif()
+# chipStar: the constant_folding test (constant_fold_lgamma_r) needs the full
+# amdgcn device-lib set, which chipStar does not build, so it always fails. It
+# is the only test in this tree; disable it here. See chipStar issue #442.
+# enable_testing()
+# add_subdirectory(test/constant_folding)
 
 include(Packages)
 
