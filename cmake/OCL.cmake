@@ -34,7 +34,7 @@ endif()
 # Disable code object version module flag if available.
 file(WRITE ${CMAKE_BINARY_DIR}/tmp.cl "")
 execute_process (
-  COMMAND ${LLVM_TOOLS_BINARY_DIR}/clang${EXE_SUFFIX} ${CLANG_OCL_FLAGS} -Xclang -mcode-object-version=none ${CMAKE_BINARY_DIR}/tmp.cl
+  COMMAND ${CMAKE_C_COMPILER} ${CLANG_OCL_FLAGS} -Xclang -mcode-object-version=none ${CMAKE_BINARY_DIR}/tmp.cl
   RESULT_VARIABLE TEST_CODE_OBJECT_VERSION_NONE_RESULT
   ERROR_QUIET
 )
@@ -101,7 +101,7 @@ macro(opencl_bc_lib)
     if (fext STREQUAL ".cl")
       set(output "${CMAKE_CURRENT_BINARY_DIR}/${fname_we}${BC_EXT}")
       add_custom_command(OUTPUT "${output}"
-        COMMAND ${CLANG_ROOT_PATH_BIN}/clang ${inc_options} ${CLANG_OCL_FLAGS}
+        COMMAND ${CMAKE_C_COMPILER} ${inc_options} ${CLANG_OCL_FLAGS}
           -emit-llvm -Xclang -mlink-builtin-bitcode -Xclang "${irif_lib_output}"
           -c "${file}" -o "${output}"
         DEPENDS "${file}" "${irif_lib_output}" "${CLANG}"
@@ -132,12 +132,12 @@ macro(opencl_bc_lib)
 
   add_custom_command(OUTPUT ${OUTPUT_BC_LIB}
     # Link regular library dependencies
-    COMMAND ${CLANG_ROOT_PATH_BIN}/llvm-link
+    COMMAND ${LLVM_LINK}
       -o "${OUT_NAME}.link0${LIB_SUFFIX}" "@${OUT_NAME}_response"
     # Extra link step with internalize
-    COMMAND ${CLANG_ROOT_PATH_BIN}/llvm-link -internalize -only-needed "${name}.link0${LIB_SUFFIX}"
+    COMMAND ${LLVM_LINK} -internalize -only-needed "${name}.link0${LIB_SUFFIX}"
       -o "${OUT_NAME}${LIB_SUFFIX}" ${internal_link_libs}
-    COMMAND ${CLANG_ROOT_PATH_BIN}/opt -passes=strip
+    COMMAND ${LLVM_OPT} -passes=strip
       -o "${OUT_NAME}${STRIP_SUFFIX}" "${OUT_NAME}${LIB_SUFFIX}"
     COMMAND "${PREPARE_BUILTINS}"
       -o ${OUTPUT_BC_LIB} "${OUT_NAME}${STRIP_SUFFIX}"
@@ -186,7 +186,7 @@ function(clang_opencl_code name dir)
   endforeach()
   set_inc_options()
   add_custom_command(OUTPUT "${OUT_NAME}.co"
-    COMMAND "${CLANG}" ${inc_options} ${CLANG_OCL_FLAGS}
+    COMMAND ${CMAKE_C_COMPILER} ${inc_options} ${CLANG_OCL_FLAGS}
       -mcpu=fiji ${mlink_flags} -o "${OUT_NAME}.co" -c "${dir}/${name}.cl"
     DEPENDS "${dir}/${name}.cl")
   add_custom_target("${TEST_TGT}" ALL
@@ -210,7 +210,7 @@ macro(clang_opencl_test name dir)
   clang_opencl_code(${name} ${dir} hip opencl ocml ockl ${OCLC_DEFAULT_LIBS})
   add_test(
     NAME ${name}:llvm-objdump
-    COMMAND ${CLANG_ROOT_PATH_BIN}/llvm-objdump -disassemble -mcpu=fiji "${name}.co"
+    COMMAND ${CMAKE_OBJDUMP} -disassemble -mcpu=fiji "${name}.co"
   )
 endmacro()
 
