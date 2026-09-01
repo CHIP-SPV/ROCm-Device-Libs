@@ -27,7 +27,7 @@ elseif(TARGET_TRIPLE MATCHES "spirv64.*")
   # first, in its own step.
   file(TOUCH ${CMAKE_CURRENT_BINARY_DIR}/empty.c)
   execute_process(
-    COMMAND ${CLANG_ROOT_PATH_BIN}/clang -target ${AMDGPU_TARGET_TRIPLE}
+    COMMAND ${CMAKE_C_COMPILER} -target ${AMDGPU_TARGET_TRIPLE}
     empty.c -emit-llvm -S -o -
     OUTPUT_VARIABLE code_output
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -49,7 +49,7 @@ foreach(template IN LISTS source_templates)
 endforeach()
 
 add_custom_command(OUTPUT ${irif_lib_file}
-  COMMAND $<TARGET_FILE:llvm-link> ${sources} -o ${irif_lib_file}
+  COMMAND ${LLVM_LINK} ${sources} -o ${irif_lib_file}
   DEPENDS ${sources})
 
 add_custom_target(irif DEPENDS ${irif_lib_file}

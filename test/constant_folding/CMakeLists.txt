@@ -25,7 +25,7 @@ message(STATUS "Running constant fold tests")
 function(add_constant_fold_test name)
   add_test(NAME constant_fold_${name}
     COMMAND ${CMAKE_COMMAND}
-     -DCLANG_BIN=$<TARGET_FILE:clang>
+     -DCLANG_BIN=${CMAKE_C_COMPILER}
      -DBINARY_DIR=${PROJECT_BINARY_DIR}
      -DFILECHECK_BIN=${FILECHECK_BIN}
      -DOUTPUT_FILE=output.${name}.ll
