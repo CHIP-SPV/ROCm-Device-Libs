@@ -171,66 +171,38 @@ static inline half __builtin_generic_clamp_f16(half x, half l, half h) {
 
 static inline int __builtin_generic_class_f32(float x, int klass) {
     uint ix = __builtin_astype(x, uint);
-
-    if ((klass & CLASS_PINF) && (ix == PINFBITPATT_SP32)) {
-        return -1;
-    }
-    if ((klass & CLASS_NINF) && (ix == NINFBITPATT_SP32)) {
-        return -1;
-    }
-    if ((klass & (CLASS_QNAN | CLASS_SNAN)) && (ix & QNANBITPATT_SP32)) {
-        return -1;
-    }
-    if ((klass & (CLASS_NZER | CLASS_PZER)) && ((ix & (~SIGNBIT_SP32)) == 0)) {
-        return -1;
-    }
-    if ((klass & (CLASS_NSUB | CLASS_PSUB)) && (((ix & EXPBITS_SP32) == 0) && ((ix & MANTBITS_SP32) != 0))) {
-        return -1;
-    }
-
-    return 0;
+    uint ax = ix & EXSIGNBIT_SP32;
+    bool neg = ix != ax;
+    int c = ax > PINFBITPATT_SP32 ? (ax >= QNANBITPATT_SP32 ? CLASS_QNAN : CLASS_SNAN) :
+            ax == PINFBITPATT_SP32 ? (neg ? CLASS_NINF : CLASS_PINF) :
+            ax >= IMPBIT_SP32 ? (neg ? CLASS_NNOR : CLASS_PNOR) :
+            ax != 0 ? (neg ? CLASS_NSUB : CLASS_PSUB) :
+            (neg ? CLASS_NZER : CLASS_PZER);
+    return (klass & c) != 0;
 }
 
 static inline int __builtin_generic_class_f64(double x, int klass) {
     ulong ix = __builtin_astype(x, ulong);
-
-    if ((klass & CLASS_PINF) && (ix == PINFBITPATT_DP64)) {
-        return -1;
-    }
-    if ((klass & CLASS_NINF) && (ix == NINFBITPATT_DP64)) {
-        return -1;
-    }
-    if ((klass & (CLASS_QNAN | CLASS_SNAN)) && (ix & QNANBITPATT_DP64)) {
-        return -1;
-    }
-    if ((klass & (CLASS_NZER | CLASS_PZER)) && ((ix & (~SIGNBIT_DP64)) == 0)) {
-        return -1;
-    }
-    if ((klass & (CLASS_NSUB | CLASS_PSUB)) && (((ix & EXPBITS_DP64) == 0) && ((ix & MANTBITS_DP64) != 0))) {
-        return -1;
-    }
-
-    return 0;
+    ulong ax = ix & EXSIGNBIT_DP64;
+    bool neg = ix != ax;
+    int c = ax > PINFBITPATT_DP64 ? (ax >= QNANBITPATT_DP64 ? CLASS_QNAN : CLASS_SNAN) :
+            ax == PINFBITPATT_DP64 ? (neg ? CLASS_NINF : CLASS_PINF) :
+            ax >= IMPBIT_DP64 ? (neg ? CLASS_NNOR : CLASS_PNOR) :
+            ax != 0 ? (neg ? CLASS_NSUB : CLASS_PSUB) :
+            (neg ? CLASS_NZER : CLASS_PZER);
+    return (klass & c) != 0;
 }
 
-static inline int __builtin_generic_class_f16(unsigned short x, int klass) {
-    if ((klass & CLASS_PINF) && (x == PINFBITPATT_HP16)) {
-        return -1;
-    }
-    if ((klass & CLASS_NINF) && (x == NINFBITPATT_HP16)) {
-        return -1;
-    }
-    if ((klass & (CLASS_QNAN | CLASS_SNAN)) && (x & QNANBITPATT_HP16)) {
-        return -1;
-    }
-    if ((klass & (CLASS_NZER | CLASS_PZER)) && ((x & (~SIGNBIT_HP16)) == 0)) {
-        return -1;
-    }
-    if ((klass & (CLASS_NSUB | CLASS_PSUB)) && (((x & EXPBITS_HP16) == 0) && ((x & MANTBITS_HP16) != 0))) {
-        return -1;
-    }
-
-    return 0;
+static inline int __builtin_generic_class_f16(half x, int klass) {
+    ushort ix = __builtin_astype(x, ushort);
+    ushort ax = ix & EXSIGNBIT_HP16;
+    bool neg = ix != ax;
+    int c = ax > PINFBITPATT_HP16 ? (ax >= QNANBITPATT_HP16 ? CLASS_QNAN : CLASS_SNAN) :
+            ax == PINFBITPATT_HP16 ? (neg ? CLASS_NINF : CLASS_PINF) :
+            ax >= IMPBIT_HP16 ? (neg ? CLASS_NNOR : CLASS_PNOR) :
+            ax != 0 ? (neg ? CLASS_NSUB : CLASS_PSUB) :
+            (neg ? CLASS_NZER : CLASS_PZER);
+    return (klass & c) != 0;
 }
 
 #define REQUIRES_16BIT_INSTS __attribute__((target("16-bit-insts")))
