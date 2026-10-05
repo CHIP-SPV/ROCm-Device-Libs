@@ -103,14 +103,9 @@ macro(opencl_bc_lib)
       add_custom_command(OUTPUT "${output}"
         COMMAND ${CMAKE_C_COMPILER} ${inc_options} ${CLANG_OCL_FLAGS}
           -emit-llvm -Xclang -mlink-builtin-bitcode -Xclang "${irif_lib_output}"
-          -c "${file}" -o "${output}"
+          -c "${file}" -o "${output}" -MD -MF "${output}.d"
         DEPENDS "${file}" "${irif_lib_output}" "${CLANG}"
-        # FIXME: Currently IMPLICIT_DEPENDS is only supported for GNU Makefile,
-        # so as an overly-conservatively workaround to cover all generators
-        # we just assume all .cl sources require irif.h. If all the generators
-        # we care about begin to support IMPLICIT_DEPENDS we won't need this.
-        "${CMAKE_CURRENT_SOURCE_DIR}/../irif/inc/irif.h"
-        IMPLICIT_DEPENDS C "${file}")
+        DEPFILE "${output}.d")
       list(APPEND deps "${output}")
       list(APPEND clean_files "${output}")
     endif()
