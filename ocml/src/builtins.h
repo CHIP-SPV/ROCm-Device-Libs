@@ -269,13 +269,29 @@ static inline int frexp_exp(float x) {
   return e;
 }
 
+static inline int frexp_exp_f64(double x) {
+  int e;
+  frexp(x, &e);
+  return e;
+}
+
+static inline float frexp_mant(float x) {
+  int e;
+  return frexp(x, &e);
+}
+
+static inline double frexp_mant_f64(double x) {
+  int e;
+  return frexp(x, &e);
+}
+
 #define BUILTIN_FREXP_EXP_F32(x) frexp_exp(x)
-#define BUILTIN_FREXP_EXP_F64(x) frexp_exp(x) 
+#define BUILTIN_FREXP_EXP_F64(x) frexp_exp_f64(x)
 #define BUILTIN_FREXP_EXP_F16(x) frexp_exp(x) 
 
-#define BUILTIN_FREXP_MANT_F32 
-#define BUILTIN_FREXP_MANT_F64 
-#define BUILTIN_FREXP_MANT_F16 
+#define BUILTIN_FREXP_MANT_F32(x) frexp_mant(x)
+#define BUILTIN_FREXP_MANT_F64(x) frexp_mant_f64(x)
+#define BUILTIN_FREXP_MANT_F16(x) ((half)frexp_mant(x))
 #endif
 
 #define BUILTIN_CMAX_F32 __builtin_fmaxf
