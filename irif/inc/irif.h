@@ -75,42 +75,28 @@
 #define MANTLENGTH_HP16   11
 #define BASEDIGITS_HP16   5
 
-static const unsigned char PIBITS_TBL[] = {
-    224, 241, 27, 193, 12, 88, 33, 116, 53, 126, 196, 126, 237, 175,
-    169, 75, 74, 41, 222, 231, 28, 244, 236, 197, 151, 175, 31,
-    235, 158, 212, 181, 168, 127, 121, 154, 253, 24, 61, 221, 38,
-    44, 159, 60, 251, 217, 180, 125, 180, 41, 104, 45, 70, 188,
-    188, 63, 96, 22, 120, 255, 95, 226, 127, 236, 160, 228, 247,
-    46, 126, 17, 114, 210, 231, 76, 13, 230, 88, 71, 230, 4, 249,
-    125, 209, 154, 192, 113, 166, 19, 18, 237, 186, 212, 215, 8,
-    162, 251, 156, 166, 196, 114, 172, 119, 248, 115, 72, 70, 39,
-    168, 187, 36, 25, 128, 75, 55, 9, 233, 184, 145, 220, 134, 21,
-    239, 122, 175, 142, 69, 249, 7, 65, 14, 241, 100, 86, 138, 109,
-    3, 119, 211, 212, 71, 95, 157, 240, 167, 84, 16, 57, 185, 13,
-    230, 139, 2, 0, 0, 0, 0, 0, 0, 0
+// 2/pi, MSB first.
+static __constant uint TWO_BY_PI[] = {
+    0xa2f9836e, 0x4e441529, 0xfc2757d1, 0xf534ddc0, 0xdb629599, 0x3c439041,
+    0xfe5163ab, 0xdebbc561, 0xb7246e3a, 0x424dd2e0, 0x06492eea, 0x09d1921c,
+    0xfe1deb1c, 0xb129a73e, 0xe88235f5, 0x2ebb4484, 0xe99c7026, 0xb45f7e41,
+    0x3991d639, 0x835339f4, 0x9c845f8b, 0xbdf9283b, 0x1ff897ff, 0xde05980f,
+    0xef2f118b, 0x5a0a6d1f, 0x6d367ecf, 0x27cb09b7, 0x4f463f66, 0x9e5fea2d,
+    0x7527bac7, 0xebe5f17b, 0x3d0739f7, 0x8a5292ea, 0x6bfb5fb1, 0x1f8d5d08,
+    0x56033046
 };
 
-static inline double __builtin_trig_preop_generic_f64(double input, int shift) {
-  shift = shift * 53;
-  int expon = 0;
-  double mant = frexp(input, &expon);
-  if (expon > 1077) {
-    shift += expon - 1077;
-  }
-  const unsigned char *ptr = PIBITS_TBL + shift / 8;
-  ulong tmp = *(ulong *)(ptr);
-  ulong tmp2 = *(ulong *)(ptr+1);
-  int rem = shift % 8;
-  if (rem) {
-    int mask = (1 << rem) - 1;
-    
-  }
-  double result = as_double(tmp & 0x1fffffffffffffUL);
-  int scale = (-53 - shift);
-  if (expon >= 1968) {
-    scale += 128;
-  }
-  return ldexp(result, scale);
+// V_TRIG_PREOP_F64: the 53 bits of 2/pi at bit offset shift, scaled by 2^(-53-shift).
+static inline double __builtin_trig_preop_generic_f64(double x, int seg) {
+  int e = (int)(as_ulong(x) >> 52) & 0x7ff;
+  int shift = (seg & 31) * 53 + (e > 1077 ? e - 1077 : 0);
+  int i = shift >> 5, b = shift & 31;
+  if (i + 2 >= 37)
+    return 0.0;
+  ulong hi = (ulong)TWO_BY_PI[i] << 32 | TWO_BY_PI[i + 1];
+  if (b)
+    hi = hi << b | TWO_BY_PI[i + 2] >> (32 - b);
+  return ldexp((double)(hi >> 11), -53 - shift + (e >= 1968 ? 128 : 0));
 }
 
 static inline float __builtin_generic_frac_f32(float x) {

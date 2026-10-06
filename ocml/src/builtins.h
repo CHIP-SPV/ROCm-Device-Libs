@@ -190,11 +190,11 @@ static inline uint BUILTIN_BITALIGN_B32(uint x, uint y, uint shift) {
 #define BUILTIN_SIN_F32 __builtin_amdgcn_sinf
 #else
 #define BUILTIN_RCP_F32(x) native_recip(x)
-#define BUILTIN_RCP_F64(x) native_recip(x)
+#define BUILTIN_RCP_F64(x) (1.0 / (x))
 #define BUILTIN_RCP_F16(x) half_recip(x)
 
 #define BUILTIN_RSQRT_F32(x) native_rsqrt(x)
-#define BUILTIN_RSQRT_F64(x) native_rsqrt(x)
+#define BUILTIN_RSQRT_F64(x) rsqrt(x)
 #define BUILTIN_RSQRT_F16(x) half_rsqrt(x)
 
 #define BUILTIN_SIN_F32 __builtin_sinf
@@ -269,13 +269,29 @@ static inline int frexp_exp(float x) {
   return e;
 }
 
+static inline int frexp_exp_f64(double x) {
+  int e;
+  frexp(x, &e);
+  return e;
+}
+
+static inline float frexp_mant(float x) {
+  int e;
+  return frexp(x, &e);
+}
+
+static inline double frexp_mant_f64(double x) {
+  int e;
+  return frexp(x, &e);
+}
+
 #define BUILTIN_FREXP_EXP_F32(x) frexp_exp(x)
-#define BUILTIN_FREXP_EXP_F64(x) frexp_exp(x) 
+#define BUILTIN_FREXP_EXP_F64(x) frexp_exp_f64(x)
 #define BUILTIN_FREXP_EXP_F16(x) frexp_exp(x) 
 
-#define BUILTIN_FREXP_MANT_F32 
-#define BUILTIN_FREXP_MANT_F64 
-#define BUILTIN_FREXP_MANT_F16 
+#define BUILTIN_FREXP_MANT_F32(x) frexp_mant(x)
+#define BUILTIN_FREXP_MANT_F64(x) frexp_mant_f64(x)
+#define BUILTIN_FREXP_MANT_F16(x) ((half)frexp_mant(x))
 #endif
 
 #define BUILTIN_CMAX_F32 __builtin_fmaxf
