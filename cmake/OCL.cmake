@@ -104,7 +104,7 @@ macro(opencl_bc_lib)
         COMMAND ${CMAKE_C_COMPILER} ${inc_options} ${CLANG_OCL_FLAGS}
           -emit-llvm -Xclang -mlink-builtin-bitcode -Xclang "${irif_lib_output}"
           -c "${file}" -o "${output}" -MD -MF "${output}.d"
-        DEPENDS "${file}" "${irif_lib_output}" "${CLANG}"
+        DEPENDS "${file}" "${irif_lib_output}" "${CMAKE_C_COMPILER}"
         DEPFILE "${output}.d")
       list(APPEND deps "${output}")
       list(APPEND clean_files "${output}")
