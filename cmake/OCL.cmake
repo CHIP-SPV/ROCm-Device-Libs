@@ -104,7 +104,7 @@ macro(opencl_bc_lib)
         COMMAND ${CMAKE_C_COMPILER} ${inc_options} ${CLANG_OCL_FLAGS}
           -emit-llvm -Xclang -mlink-builtin-bitcode -Xclang "${irif_lib_output}"
           -c "${file}" -o "${output}" -MD -MF "${output}.d"
-        DEPENDS "${file}" "${irif_lib_output}" "${CMAKE_C_COMPILER}"
+        DEPENDS "${file}" "${irif_lib_output}" "${CMAKE_C_COMPILER}" ${CHIP_LLVM_SHARED_LIBS}
         DEPFILE "${output}.d")
       list(APPEND deps "${output}")
       list(APPEND clean_files "${output}")
@@ -136,7 +136,8 @@ macro(opencl_bc_lib)
       -o "${OUT_NAME}${STRIP_SUFFIX}" "${OUT_NAME}${LIB_SUFFIX}"
     COMMAND "${PREPARE_BUILTINS}"
       -o ${OUTPUT_BC_LIB} "${OUT_NAME}${STRIP_SUFFIX}"
-      DEPENDS "${deps}" "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}_response" "${PREPARE_BUILTINS}" ${internal_link_libs})
+      DEPENDS "${deps}" "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}_response" "${PREPARE_BUILTINS}" ${internal_link_libs}
+        "${LLVM_LINK}" "${LLVM_OPT}" ${CHIP_LLVM_SHARED_LIBS})
 
   add_custom_target("${name}" ALL
     DEPENDS "${OUTPUT_DIR}/${OUT_NAME}${FINAL_SUFFIX}"

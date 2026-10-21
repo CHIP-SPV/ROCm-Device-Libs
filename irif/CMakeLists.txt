@@ -50,7 +50,7 @@ endforeach()
 
 add_custom_command(OUTPUT ${irif_lib_file}
   COMMAND ${LLVM_LINK} ${sources} -o ${irif_lib_file}
-  DEPENDS ${sources})
+  DEPENDS ${sources} "${LLVM_LINK}" ${CHIP_LLVM_SHARED_LIBS})
 
 add_custom_target(irif DEPENDS ${irif_lib_file}
                        SOURCES ${sources})
